@@ -52,6 +52,14 @@ Customization
 ``magit-commit-mark-on-show-commit-delay`` (``2.0``)
    Delay (in seconds) before marking the commit as read (zero for instantly setting as read).
 
+``magit-commit-mark-on-show-commit`` (``t``)
+   Showing a commit marks it as read.
+
+``magit-commit-mark-sha1-length`` (``12``)
+   The number of SHA1 characters to store & use to identify commits.
+
+   This must not be longer than the value used when displaying the log.
+
 ``magit-commit-mark-directory``
    The directory where the commit state for each repository is stored.
 

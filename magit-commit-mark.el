@@ -47,6 +47,12 @@
   "Delay (in seconds) before marking as read."
   :type 'float)
 
+(defcustom magit-commit-mark-sha1-length 12
+  "The number of SHA1 characters to store & use to identify commits.
+
+This must not be longer than the value used when displaying the log."
+  :type 'integer)
+
 (defcustom magit-commit-mark-directory
   (locate-user-emacs-file "magit-commit-mark" ".emacs-magit-commit-mark")
   "The directory to store the repository marking data."
@@ -127,7 +133,7 @@
           (magit-branch-or-commit-at-point))))
     (unless sha1
       (user-error "No sha1 found"))
-    sha1))
+    (substring sha1 0 magit-commit-mark-sha1-length)))
 
 (defun magit-commit-mark--get-context-vars-or-error ()
   "Access repository directory and sha1 from the current context (or error)."
@@ -181,6 +187,7 @@
           (let ((sha1 (buffer-substring-no-properties point-sha1-beg point-sha1-end)))
             ;; Unlikely to fail.
             (when (string-match-p "\\`[[:xdigit:]]+\\'" sha1)
+              (setq sha1 (substring sha1 0 magit-commit-mark-sha1-length))
               (let*
                 (
                   (value (or (gethash sha1 repo-hash) 0))
@@ -441,6 +448,12 @@ This calls OLD-FN with ARGS."
   ;; Regular function.
   (apply old-fn args))
 
+(defun magit-commit-mark--magit-log-arguments-extra (fn-orig &optional mode)
+  "Add extra arguments to git log view around FN-ORIG, optionally passing MODE.
+Needed so we can be sure to view the required number of SHA1 chars."
+  (pcase-let ((`(,args ,files) (funcall fn-orig mode)))
+    (list (append args (list (format "--abbrev=%d" magit-commit-mark-sha1-length))) files)))
+
 
 ;; ---------------------------------------------------------------------------
 ;; Immediate Font Locking
@@ -474,6 +487,8 @@ This calls OLD-FN with ARGS."
 
   (magit-commit-mark--immediate-enable)
 
+  (advice-add 'magit-log-arguments :around #'magit-commit-mark--magit-log-arguments-extra)
+
   (when magit-commit-mark-on-show-commit
     (advice-add 'magit-show-commit :around #'magit-commit-mark--show-commit-advice)))
 
@@ -481,6 +496,8 @@ This calls OLD-FN with ARGS."
   "Disable the buffer local minor mode."
 
   (magit-commit-mark--immediate-disable)
+
+  (advice-remove 'magit-log-arguments #'magit-commit-mark--magit-log-arguments-extra)
 
   (when magit-commit-mark-on-show-commit
     (advice-remove 'magit-show-commit #'magit-commit-mark--show-commit-advice))
