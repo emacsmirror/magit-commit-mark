@@ -473,17 +473,16 @@ Needed so we can be sure to view the required number of SHA1 chars."
   "Enable the buffer local minor mode."
   ;; Initialize the buffer (can't run directly, use idle timer).
 
-  (magit-commit-mark--immediate-enable)
-
   (advice-add 'magit-log-arguments :around #'magit-commit-mark--magit-log-arguments-extra)
 
   (when magit-commit-mark-on-show-commit
-    (advice-add 'magit-show-commit :around #'magit-commit-mark--show-commit-advice)))
+    (advice-add 'magit-show-commit :around #'magit-commit-mark--show-commit-advice))
+
+  (when (eq major-mode 'magit-log-mode)
+    (magit-commit-mark--immediate-enable)))
 
 (defun magit-commit-mark--disable ()
   "Disable the buffer local minor mode."
-
-  (magit-commit-mark--immediate-disable)
 
   (advice-remove 'magit-log-arguments #'magit-commit-mark--magit-log-arguments-extra)
 
@@ -493,7 +492,9 @@ Needed so we can be sure to view the required number of SHA1 chars."
   (when magit-commit-mark--on-show-commit-global-timer
     (cancel-timer magit-commit-mark--on-show-commit-global-timer))
 
-  (kill-local-variable 'magit-commit-mark--overlays))
+  (when (eq major-mode 'magit-log-mode)
+    (magit-commit-mark--immediate-disable)
+    (kill-local-variable 'magit-commit-mark--overlays)))
 
 
 ;; ---------------------------------------------------------------------------
