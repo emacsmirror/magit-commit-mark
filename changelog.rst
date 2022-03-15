@@ -5,6 +5,9 @@ Change Log
 
 - In development.
 
+  - 2022/03/15:
+    Fix marking when the cursor wasn't at the beginning of the line.
+
   - 2022/03/11:
     Font locking should only be applied to ``magit-log-mode`` (not other magit modes).
 

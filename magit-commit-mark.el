@@ -377,6 +377,13 @@ When NO-FILE-READ is non-nil, initialize with an empty hash."
   (pcase-let ((`(,repo-dir . ,sha1) (magit-commit-mark--get-context-vars-or-error)))
     (magit-commit-mark--commit-at-point-manipulate-with-sha1 repo-dir sha1 action bit)))
 
+;; NOTE: it's important to move to the beginning of the line since the user may have
+;; moved the cursor elsewhere, causing the SHA1 not to be detected.
+(defun magit-commit-mark--commit-at-point-action-on-bit-bol (action bit)
+  "Perform ACTION on flag BIT (at line start)."
+  (save-excursion
+    (beginning-of-line)
+    (magit-commit-mark--commit-at-point-action-on-bit action bit)))
 
 ;; ---------------------------------------------------------------------------
 ;; Internal Integration Functions
@@ -505,21 +512,21 @@ Needed so we can be sure to view the required number of SHA1 chars."
   "Toggle the current commit read status.
 ARG is the bit which is toggled, defaulting to 1 (read/unread)."
   (interactive)
-  (magit-commit-mark--commit-at-point-action-on-bit 'toggle magit-commit-mark--bitflag-read))
+  (magit-commit-mark--commit-at-point-action-on-bit-bol 'toggle magit-commit-mark--bitflag-read))
 
 ;;;###autoload
 (defun magit-commit-mark-toggle-star ()
   "Toggle the current commit star status.
 ARG is the bit which is toggled, defaulting to 1 (read/unread)."
   (interactive)
-  (magit-commit-mark--commit-at-point-action-on-bit 'toggle magit-commit-mark--bitflag-star))
+  (magit-commit-mark--commit-at-point-action-on-bit-bol 'toggle magit-commit-mark--bitflag-star))
 
 ;;;###autoload
 (defun magit-commit-mark-toggle-urgent ()
   "Toggle the current commit urgent status.
 ARG is the bit which is toggled, defaulting to 1 (read/unread)."
   (interactive)
-  (magit-commit-mark--commit-at-point-action-on-bit 'toggle magit-commit-mark--bitflag-urgent))
+  (magit-commit-mark--commit-at-point-action-on-bit-bol 'toggle magit-commit-mark--bitflag-urgent))
 
 ;;;###autoload
 (define-minor-mode magit-commit-mark-mode
