@@ -108,8 +108,8 @@ This must not be longer than the value used when displaying the log."
       (user-error "Unable to find the directory for this GIT repository!"))
     repo-dir))
 
-(defun magit-commit-mark--get-sha1-at-point-or-error ()
-  "Return the SHA1 at point."
+(defun magit-commit-mark--get-sha1-at-point-or-nil ()
+  "Return the SHA1 at point or nil."
   (let
     (
       (sha1
@@ -117,9 +117,15 @@ This must not be longer than the value used when displaying the log."
           (magit-section-value-if 'module-commit)
           (thing-at-point 'git-revision t)
           (magit-branch-or-commit-at-point))))
+    (when sha1
+      (substring sha1 0 magit-commit-mark-sha1-length))))
+
+(defun magit-commit-mark--get-sha1-at-point-or-error ()
+  "Return the SHA1 at point or raise an error."
+  (let ((sha1 (magit-commit-mark--get-sha1-at-point-or-nil)))
     (unless sha1
       (user-error "No sha1 found"))
-    (substring sha1 0 magit-commit-mark-sha1-length)))
+    sha1))
 
 (defun magit-commit-mark--get-context-vars-or-error ()
   "Access repository directory and sha1 from the current context (or error)."
@@ -370,6 +376,51 @@ When NO-FILE-READ is non-nil, initialize with an empty hash."
       (magit-commit-mark--overlay-refresh repo-hash)
       (magit-commit-mark--hashfile-write))))
 
+
+;; ---------------------------------------------------------------------------
+;; Step to Commit by Flag
+
+(defun magit-commit-mark--step-to-bit-test-at-point (repo-hash state flag)
+  "Check the REPO-HASH at the current point has it's FLAG set to STATE."
+  (let ((sha1 (magit-commit-mark--get-sha1-at-point-or-nil)))
+    (when sha1
+      (let ((value (or (gethash sha1 repo-hash) 0)))
+        (eq state (not (zerop (logand value flag))))))))
+
+(defun magit-commit-mark--step-to-bit (dir state bit)
+  "Move DIR to the next message with BIT set to STATE."
+  ;; NOTE: don't depend on the display state, access the hash directly.
+  (let*
+    (
+      (repo-dir (magit-commit-mark--get-repo-dir))
+      (repo-hash (magit-commit-mark--hash-ensure repo-dir))
+      (flag (ash 1 bit))
+      (point-prev nil)
+      (found nil)
+      (found-point nil))
+
+    (save-excursion
+      (forward-line dir)
+
+      (while
+        (and
+          (not (eq point-prev (point)))
+          (not (setq found (magit-commit-mark--step-to-bit-test-at-point repo-hash state flag))))
+        (setq point-prev (point))
+        (forward-line dir))
+
+      (when found
+        (setq found-point (point))))
+
+    (cond
+      (found-point
+        (goto-char found-point)
+        (call-interactively 'magit-show-commit)
+        t)
+      (t
+        nil))))
+
+
 (defun magit-commit-mark--commit-at-point-action-on-bit (action bit)
   "Perform ACTION on flag BIT."
   (pcase-let ((`(,repo-dir . ,sha1) (magit-commit-mark--get-context-vars-or-error)))
@@ -525,6 +576,21 @@ ARG is the bit which is toggled, defaulting to 1 (read/unread)."
 ARG is the bit which is toggled, defaulting to 1 (read/unread)."
   (interactive)
   (magit-commit-mark--commit-at-point-action-on-bit-bol 'toggle magit-commit-mark--bitflag-urgent))
+
+;; NOTE: other stepping functions could be added,
+;; for now stepping by unread seems the most useful.
+
+;;;###autoload
+(defun magit-commit-mark-next-unread ()
+  "Jump to the next unread message."
+  (interactive)
+  (magit-commit-mark--step-to-bit 1 nil magit-commit-mark--bitflag-read))
+
+;;;###autoload
+(defun magit-commit-mark-prev-unread ()
+  "Jump to the previous unread message."
+  (interactive)
+  (magit-commit-mark--step-to-bit -1 nil magit-commit-mark--bitflag-read))
 
 ;;;###autoload
 (define-minor-mode magit-commit-mark-mode

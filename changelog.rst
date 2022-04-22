@@ -5,6 +5,10 @@ Change Log
 
 - In development.
 
+  - 2022/04/22:
+    Add ``magit-commit-mark-next-unread`` and ``magit-commit-mark-prev-unread`` to support
+    easily navigating to the next/previous unread commit.
+
   - 2022/03/15:
     Fix marking when the cursor wasn't at the beginning of the line.
 
