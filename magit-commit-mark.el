@@ -5,7 +5,7 @@
 
 ;; Author: Campbell Barton <ideasman42@gmail.com>
 
-;; URL: https://codeberg.com/ideasman42/emacs-magit-commit-mark
+;; URL: https://codeberg.org/ideasman42/emacs-magit-commit-mark
 ;; Version: 0.1.0
 ;; Package-Requires: ((emacs "28.1") (magit "3.3.0"))
 
@@ -387,6 +387,13 @@ When NO-FILE-READ is non-nil, initialize with an empty hash."
       (let ((value (or (gethash sha1 repo-hash) 0)))
         (eq state (not (zerop (logand value flag))))))))
 
+(defun magit-commit-mark--step-to-bit-test-at-point-strict (repo-hash state flag)
+  "Check the REPO-HASH at the current point has it's FLAG set to STATE.
+This is a strict version which requires the SHA1 to be at the line start,
+useful for merge commits that show branching lines."
+  (unless (eq ?\s (char-after (line-beginning-position)))
+    (magit-commit-mark--step-to-bit-test-at-point repo-hash state flag)))
+
 (defun magit-commit-mark--step-to-bit (dir state bit)
   "Move DIR to the next message with BIT set to STATE."
   ;; NOTE: don't depend on the display state, access the hash directly.
@@ -405,7 +412,9 @@ When NO-FILE-READ is non-nil, initialize with an empty hash."
       (while
         (and
           (not (eq point-prev (point)))
-          (not (setq found (magit-commit-mark--step-to-bit-test-at-point repo-hash state flag))))
+          (not
+            (setq found
+              (magit-commit-mark--step-to-bit-test-at-point-strict repo-hash state flag))))
         (setq point-prev (point))
         (forward-line dir))
 
