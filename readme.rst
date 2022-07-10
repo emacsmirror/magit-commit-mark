@@ -19,7 +19,7 @@ especially when reading commits out-of-order.
 This package supports marking commits as read/unread when viewed in ``magit-log``,
 so you can tell at a glance which commits are new or need to be checked.
 
-.. figure:: https://gitlab.com/uploads/-/system/project/avatar/30681128/magit-commit-mark_indexed.png
+.. figure:: https://codeberg.org/attachments/444f1a09-1fc5-464a-80d7-3e7a00fd2ae1
    :scale: 50 %
    :align: center
 
