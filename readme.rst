@@ -41,6 +41,10 @@ Functions
    Toggle "star" for the commit at point.
 ``magit-commit-mark-toggle-urgent``
    Toggle "urgent" for the commit at point.
+``magit-commit-mark-next-unread``
+   Jump to the next unread commit.
+``magit-commit-mark-prev-unread``
+   Jump to the previous unread commit.
 
 
 Customization
