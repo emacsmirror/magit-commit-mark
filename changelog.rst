@@ -5,6 +5,10 @@ Change Log
 
 - In development.
 
+  - 2022/07/22:
+    Fix bug where the magit's timer to show a revision after motion
+    would interfere with showing the next/previous unread message.
+
   - 2022/04/22:
     Add ``magit-commit-mark-next-unread`` and ``magit-commit-mark-prev-unread`` to support
     easily navigating to the next/previous unread commit.

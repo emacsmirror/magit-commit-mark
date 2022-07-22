@@ -424,7 +424,12 @@ useful for merge commits that show branching lines."
     (cond
       (found-point
         (goto-char found-point)
-        (call-interactively 'magit-show-commit)
+
+        ;; Use maybe-update with a zero timer instead of `(call-interactively 'magit-show-commit)'
+        ;; Because it handles canceling the idle timer, causing an occasional glitch
+        ;; where the idle timer opens a different commit than this one.
+        (let ((magit-update-other-window-delay 0.0))
+          (magit-log-maybe-update-revision-buffer))
         t)
       (t
         nil))))
