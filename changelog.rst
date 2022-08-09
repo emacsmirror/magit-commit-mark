@@ -5,6 +5,10 @@ Change Log
 
 - In development.
 
+  - 2022/08/09:
+
+    Add ``magit-commit-mark-on-skip-to-unread`` as a convenient way to immediately mark commits as unread.
+
   - 2022/07/22:
     Fix bug where the magit's timer to show a revision after motion
     would interfere with showing the next/previous unread message.

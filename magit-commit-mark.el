@@ -31,6 +31,10 @@
   "Mark commits as read when displayed (with `magit-show-commit')."
   :type 'boolean)
 
+(defcustom magit-commit-mark-on-skip-to-unread nil
+  "Mark commits as read immediately when skipping to the next/previous unread."
+  :type 'boolean)
+
 (defcustom magit-commit-mark-on-show-commit-delay 2.0
   "Delay (in seconds) before marking as read."
   :type 'float)
@@ -598,13 +602,21 @@ ARG is the bit which is toggled, defaulting to 1 (read/unread)."
 (defun magit-commit-mark-next-unread ()
   "Jump to the next unread message."
   (interactive)
-  (magit-commit-mark--step-to-bit 1 nil magit-commit-mark--bitflag-read))
+  (let ((bit magit-commit-mark--bitflag-read))
+    (when (magit-commit-mark--step-to-bit 1 nil bit)
+      (when magit-commit-mark-on-skip-to-unread
+        (magit-commit-mark--commit-at-point-action-on-bit-bol 'set bit))
+      t)))
 
 ;;;###autoload
 (defun magit-commit-mark-prev-unread ()
   "Jump to the previous unread message."
   (interactive)
-  (magit-commit-mark--step-to-bit -1 nil magit-commit-mark--bitflag-read))
+  (let ((bit magit-commit-mark--bitflag-read))
+    (when (magit-commit-mark--step-to-bit -1 nil bit)
+      (when magit-commit-mark-on-skip-to-unread
+        (magit-commit-mark--commit-at-point-action-on-bit-bol 'set bit))
+      t)))
 
 ;;;###autoload
 (define-minor-mode magit-commit-mark-mode

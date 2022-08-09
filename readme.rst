@@ -59,6 +59,11 @@ Customization
 ``magit-commit-mark-on-show-commit`` (``t``)
    Showing a commit marks it as read.
 
+``magit-commit-mark-on-skip-to-unread`` (``nil``)
+   Immediately mark the commit as read when navigating using
+   ``magit-commit-mark-next-unread`` & ``magit-commit-mark-prev-unread``.
+   Instead of relying on the commit delay timer to mark as read.
+
 ``magit-commit-mark-sha1-length`` (``12``)
    The number of SHA1 characters to store & use to identify commits.
 
