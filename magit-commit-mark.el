@@ -52,20 +52,16 @@ This must not be longer than the value used when displaying the log."
 
 ;; Faces.
 
-(defface magit-commit-mark-read-face
-  (list (list t (list :inherit 'font-lock-comment-face)))
+(defface magit-commit-mark-read-face (list (list t (list :inherit 'font-lock-comment-face)))
   "Face used to highlight the commit as read.")
 
-(defface magit-commit-mark-unread-face
-  (list (list t (list :inherit 'success)))
+(defface magit-commit-mark-unread-face (list (list t (list :inherit 'success)))
   "Face used to highlight the commit as unread.")
 
-(defface magit-commit-mark-star-face
-  (list (list t (list :inherit 'warning)))
+(defface magit-commit-mark-star-face (list (list t (list :inherit 'warning)))
   "Face used to highlight the commit as starred.")
 
-(defface magit-commit-mark-urgent-face
-  (list (list t (list :inherit 'error :extend t)))
+(defface magit-commit-mark-urgent-face (list (list t (list :inherit 'error :extend t)))
   "Face used to highlight the commit as urgent.")
 
 
@@ -94,9 +90,11 @@ This must not be longer than the value used when displaying the log."
 
 (defun magit-commit-mark--make-file-name-from-repo (repo-name)
   "Take the path REPO-NAME and return a name base on this."
-  (file-name-concat
-    magit-commit-mark-directory
-    (concat (url-hexify-string (convert-standard-filename (expand-file-name repo-name))) ".data")))
+  (file-name-concat magit-commit-mark-directory
+                    (concat
+                     (url-hexify-string
+                      (convert-standard-filename (expand-file-name repo-name)))
+                     ".data")))
 
 (defun magit-commit-mark--get-repo-dir ()
   "Return the current repository root directory."
@@ -114,13 +112,10 @@ This must not be longer than the value used when displaying the log."
 
 (defun magit-commit-mark--get-sha1-at-point-or-nil ()
   "Return the SHA1 at point or nil."
-  (let
-    (
-      (sha1
-        (or
-          (magit-section-value-if 'module-commit)
-          (thing-at-point 'git-revision t)
-          (magit-branch-or-commit-at-point))))
+  (let ((sha1
+         (or (magit-section-value-if 'module-commit)
+             (thing-at-point 'git-revision t)
+             (magit-branch-or-commit-at-point))))
     (when sha1
       (substring sha1 0 magit-commit-mark-sha1-length))))
 
@@ -153,29 +148,29 @@ This must not be longer than the value used when displaying the log."
     (remove-overlays point-beg point-end 'magit-commit-mark t)
     ;; Remove all overlays from this list which don't have an associated buffer.
     (setq magit-commit-mark--overlays
-      (delq nil (mapcar (lambda (ov) (and (overlay-buffer ov) ov)) magit-commit-mark--overlays))))
+          (delq
+           nil
+           (mapcar (lambda (ov) (and (overlay-buffer ov) ov)) magit-commit-mark--overlays))))
 
   (let
-    ( ;; Constants.
-      (flag-read (ash 1 magit-commit-mark--bitflag-read))
-      (flag-star (ash 1 magit-commit-mark--bitflag-star))
-      (flag-urgent (ash 1 magit-commit-mark--bitflag-urgent))
+      ( ;; Constants.
+       (flag-read (ash 1 magit-commit-mark--bitflag-read))
+       (flag-star (ash 1 magit-commit-mark--bitflag-star))
+       (flag-urgent (ash 1 magit-commit-mark--bitflag-urgent))
 
-      (point-prev nil))
+       (point-prev nil))
 
     ;; Set beginning.
     (goto-char point-beg)
     (goto-char (line-beginning-position))
 
     (while (and (< (point) point-end) (not (eq (point) point-prev)))
-      (let
-        (
-          (point-sha1-beg (point))
-          (point-sha1-end nil)
-          (point-star-beg nil)
-          (point-star-end nil)
-          (point-subject-beg nil)
-          (point-subject-end (line-end-position)))
+      (let ((point-sha1-beg (point))
+            (point-sha1-end nil)
+            (point-star-beg nil)
+            (point-star-end nil)
+            (point-subject-beg nil)
+            (point-subject-end (line-end-position)))
 
         (unless (zerop (skip-chars-forward "^[:blank:]" point-subject-end))
           (setq point-sha1-end (point))
@@ -184,12 +179,10 @@ This must not be longer than the value used when displaying the log."
             ;; Unlikely to fail.
             (when (string-match-p "\\`[[:xdigit:]]+\\'" sha1)
               (setq sha1 (substring sha1 0 magit-commit-mark-sha1-length))
-              (let*
-                (
-                  (value (or (gethash sha1 repo-hash) 0))
-                  (is-read (not (zerop (logand value flag-read))))
-                  (is-star (not (zerop (logand value flag-star))))
-                  (is-urgent (not (zerop (logand value flag-urgent)))))
+              (let* ((value (or (gethash sha1 repo-hash) 0))
+                     (is-read (not (zerop (logand value flag-read))))
+                     (is-star (not (zerop (logand value flag-star))))
+                     (is-urgent (not (zerop (logand value flag-urgent)))))
 
                 (when (or is-urgent is-star)
                   (goto-char point-sha1-end)
@@ -201,24 +194,24 @@ This must not be longer than the value used when displaying the log."
                   (goto-char point-sha1-end)
                   (skip-chars-forward "^*" point-subject-beg)
                   (cond
-                    ((eq ?\* (char-after (point)))
-                      (setq point-star-beg (- (point) 1))
-                      (setq point-star-end (+ (point) 2)))
-                    (t
-                      ;; Fallback (unlikely to be needed).
-                      (setq point-star-beg point-sha1-end)
-                      (setq point-star-end point-subject-beg))))
+                   ((eq ?\* (char-after (point)))
+                    (setq point-star-beg (- (point) 1))
+                    (setq point-star-end (+ (point) 2)))
+                   (t
+                    ;; Fallback (unlikely to be needed).
+                    (setq point-star-beg point-sha1-end)
+                    (setq point-star-end point-subject-beg))))
 
                 ;; Read status.
                 (let ((ov (make-overlay point-sha1-beg point-sha1-end)))
                   (overlay-put ov 'magit-commit-mark t)
                   (overlay-put
-                    ov 'face
-                    (cond
-                      (is-read
-                        'magit-commit-mark-read-face)
-                      (t
-                        'magit-commit-mark-unread-face)))
+                   ov 'face
+                   (cond
+                    (is-read
+                     'magit-commit-mark-read-face)
+                    (t
+                     'magit-commit-mark-unread-face)))
                   (push ov magit-commit-mark--overlays))
 
                 ;; Starred status.
@@ -243,13 +236,13 @@ This must not be longer than the value used when displaying the log."
   "Refresh all SHA1 overlays using REPO-HASH."
   (save-excursion
     (magit-commit-mark--overlay-refresh-range
-      repo-hash
-      (save-excursion
-        (goto-char (max (point-min) (window-start)))
-        (line-beginning-position))
-      (save-excursion
-        (goto-char (min (point-max) (window-end)))
-        (line-end-position)))))
+     repo-hash
+     (save-excursion
+       (goto-char (max (point-min) (window-start)))
+       (line-beginning-position))
+     (save-excursion
+       (goto-char (min (point-max) (window-end)))
+       (line-end-position)))))
 
 
 ;; ---------------------------------------------------------------------------
@@ -265,25 +258,25 @@ This must not be longer than the value used when displaying the log."
 When NO-FILE-READ is non-nil, initialize with an empty hash."
   (let ((cell (assoc repo-dir magit-commit-mark--repo-hashes)))
     (cond
-      (cell
-        (cdr cell))
-      ;; Initialize with empty hash.
-      (no-file-read
-        (let ((repo-hash (magit-commit-mark--hash-create)))
-          (push (cons repo-dir repo-hash) magit-commit-mark--repo-hashes)
-          repo-hash))
-      ;; Initialize from file.
-      (t
-        (magit-commit-mark--hashfile-read-with-dir repo-dir)))))
+     (cell
+      (cdr cell))
+     ;; Initialize with empty hash.
+     (no-file-read
+      (let ((repo-hash (magit-commit-mark--hash-create)))
+        (push (cons repo-dir repo-hash) magit-commit-mark--repo-hashes)
+        repo-hash))
+     ;; Initialize from file.
+     (t
+      (magit-commit-mark--hashfile-read-with-dir repo-dir)))))
 
 (defun magit-commit-mark--hash-set (repo-dir repo-hash)
   "Set REPO-DIR REPO-HASH in `magit-commit-mark--repo-hashes'."
   (let ((cell (assoc repo-dir magit-commit-mark--repo-hashes)))
     (cond
-      (cell
-        (setcdr cell repo-hash))
-      (t
-        (push (cons repo-dir repo-hash) magit-commit-mark--repo-hashes)))))
+     (cell
+      (setcdr cell repo-hash))
+     (t
+      (push (cons repo-dir repo-hash) magit-commit-mark--repo-hashes)))))
 
 
 ;; ---------------------------------------------------------------------------
@@ -292,17 +285,15 @@ When NO-FILE-READ is non-nil, initialize with an empty hash."
 (defun magit-commit-mark--hashfile-read-with-dir (repo-dir)
   "Load hash file for REPO-DIR."
   (let ((hash-file (magit-commit-mark--make-file-name-from-repo repo-dir)))
-    (let
-      (
-        (repo-hash
-          (cond
+    (let ((repo-hash
+           (cond
             ((file-exists-p hash-file)
-              (with-temp-buffer
-                (insert-file-contents hash-file)
-                (goto-char (point-min))
-                (read (current-buffer))))
+             (with-temp-buffer
+               (insert-file-contents hash-file)
+               (goto-char (point-min))
+               (read (current-buffer))))
             (t
-              (magit-commit-mark--hash-create)))))
+             (magit-commit-mark--hash-create)))))
 
       ;; Should never happen, paranoid sanity check!
       (unless (hash-table-p repo-hash)
@@ -346,36 +337,33 @@ When NO-FILE-READ is non-nil, initialize with an empty hash."
 
 (defun magit-commit-mark--commit-at-point-manipulate-with-sha1 (repo-dir sha1 action bit)
   "Mark REPO-DIR repository as read with SHA1 using ACTION operating on BIT."
-  (let*
-    (
-      (repo-hash (magit-commit-mark--hash-ensure repo-dir))
-      (flag (ash 1 bit))
-      (value-real (gethash sha1 repo-hash))
-      (value (or value-real 0))
-      (value-next
-        (pcase action
-          ('set (logior value flag))
-          ('clear (logand value (lognot flag)))
-          ('toggle (logxor value flag))
-          (code (message "Unknown value %S" code)))))
+  (let* ((repo-hash (magit-commit-mark--hash-ensure repo-dir))
+         (flag (ash 1 bit))
+         (value-real (gethash sha1 repo-hash))
+         (value (or value-real 0))
+         (value-next
+          (pcase action
+            ('set (logior value flag))
+            ('clear (logand value (lognot flag)))
+            ('toggle (logxor value flag))
+            (code (message "Unknown value %S" code)))))
 
     ;; When the result is true, the value change, update the file.
-    (when
-      (cond
-        ;; Do nothing, no value exist and it remains zero.
-        ((and (null value-real) (zerop value-next))
-          nil)
-        ;; Do nothing, value is unchanged.
-        ((eq value value-next)
-          nil)
-        ;; Value was removed.
-        ((zerop value-next)
-          (remhash sha1 repo-hash)
-          t)
-        ;; Value was added or updated.
-        (t
-          (puthash sha1 value-next repo-hash)
-          t))
+    (when (cond
+           ;; Do nothing, no value exist and it remains zero.
+           ((and (null value-real) (zerop value-next))
+            nil)
+           ;; Do nothing, value is unchanged.
+           ((eq value value-next)
+            nil)
+           ;; Value was removed.
+           ((zerop value-next)
+            (remhash sha1 repo-hash)
+            t)
+           ;; Value was added or updated.
+           (t
+            (puthash sha1 value-next repo-hash)
+            t))
 
       (magit-commit-mark--overlay-refresh repo-hash)
       (magit-commit-mark--hashfile-write))))
@@ -401,24 +389,23 @@ useful for merge commits that show branching lines."
 (defun magit-commit-mark--step-to-bit (dir state bit)
   "Move DIR to the next message with BIT set to STATE."
   ;; NOTE: don't depend on the display state, access the hash directly.
-  (let*
-    (
-      (repo-dir (magit-commit-mark--get-repo-dir))
-      (repo-hash (magit-commit-mark--hash-ensure repo-dir))
-      (flag (ash 1 bit))
-      (point-prev nil)
-      (found nil)
-      (found-point nil))
+  (let* ((repo-dir (magit-commit-mark--get-repo-dir))
+         (repo-hash (magit-commit-mark--hash-ensure repo-dir))
+         (flag (ash 1 bit))
+         (point-prev nil)
+         (found nil)
+         (found-point nil))
 
     (save-excursion
       (forward-line dir)
 
-      (while
-        (and
-          (not (eq point-prev (point)))
-          (not
-            (setq found
-              (magit-commit-mark--step-to-bit-test-at-point-strict repo-hash state flag))))
+      (while (and (not (eq point-prev (point)))
+                  (not
+                   (setq found
+                         (magit-commit-mark--step-to-bit-test-at-point-strict
+                          repo-hash
+                          state
+                          flag))))
         (setq point-prev (point))
         (forward-line dir))
 
@@ -426,17 +413,17 @@ useful for merge commits that show branching lines."
         (setq found-point (point))))
 
     (cond
-      (found-point
-        (goto-char found-point)
+     (found-point
+      (goto-char found-point)
 
-        ;; Use maybe-update with a zero timer instead of `(call-interactively 'magit-show-commit)'
-        ;; Because it handles canceling the idle timer, causing an occasional glitch
-        ;; where the idle timer opens a different commit than this one.
-        (let ((magit-update-other-window-delay 0.0))
-          (magit-log-maybe-update-revision-buffer))
-        t)
-      (t
-        nil))))
+      ;; Use maybe-update with a zero timer instead of `(call-interactively 'magit-show-commit)'
+      ;; Because it handles canceling the idle timer, causing an occasional glitch
+      ;; where the idle timer opens a different commit than this one.
+      (let ((magit-update-other-window-delay 0.0))
+        (magit-log-maybe-update-revision-buffer))
+      t)
+     (t
+      nil))))
 
 
 (defun magit-commit-mark--commit-at-point-action-on-bit (action bit)
@@ -465,47 +452,49 @@ REPO-DIR and SHA1 are forwarded to
     (with-current-buffer buf
       (when (eq point-beg (line-beginning-position))
         (magit-commit-mark--commit-at-point-manipulate-with-sha1
-          repo-dir
-          sha1
-          'set
-          magit-commit-mark--bitflag-read)))))
+         repo-dir
+         sha1
+         'set
+         magit-commit-mark--bitflag-read)))))
 
 (defun magit-commit-mark--show-commit-advice (old-fn &rest args)
   "Internal function use to advise using `magit-show-commit'.
 
 This calls OLD-FN with ARGS."
   (let
-    ( ;; We only care about the SHA1, other values aren't important.
-      (sha1 (car args))
-      ;; Demote error so it's obvious marking failed and `old-fn' is never prevented from running.
-      ;; In practice this should never happen, it's mainly to prevent this package
-      ;; from breaking `magit' even in the chance of extremely unlikely situations.
-      (repo-dir (with-demoted-errors "%S" (magit-commit-mark--get-repo-dir-or-error))))
-    (cond
-      ;; The error will have been demoted to a message, do nothing.
-      ((null repo-dir)
-        nil)
-      ;; No delay.
-      ((zerop magit-commit-mark-on-show-commit-delay)
+      ( ;; We only care about the SHA1, other values aren't important.
+       (sha1 (car args))
+       ;; Demote error so it's obvious marking failed and `old-fn' is never prevented from running.
+       ;; In practice this should never happen, it's mainly to prevent this package
+       ;; from breaking `magit' even in the chance of extremely unlikely situations.
+       (repo-dir
         (with-demoted-errors "%S"
-          (magit-commit-mark--commit-at-point-manipulate-with-sha1
-            repo-dir
-            sha1
-            'set
-            magit-commit-mark--bitflag-read)))
-      ;; Use timer for delay.
-      (t
-        (when magit-commit-mark--on-show-commit-global-timer
-          (cancel-timer magit-commit-mark--on-show-commit-global-timer))
-        (setq magit-commit-mark--on-show-commit-global-timer
-          (run-with-idle-timer
-            magit-commit-mark-on-show-commit-delay
-            nil
-            #'magit-commit-mark--show-commit-timer
-            (current-buffer)
-            (line-beginning-position)
-            repo-dir
-            sha1)))))
+          (magit-commit-mark--get-repo-dir-or-error))))
+    (cond
+     ;; The error will have been demoted to a message, do nothing.
+     ((null repo-dir)
+      nil)
+     ;; No delay.
+     ((zerop magit-commit-mark-on-show-commit-delay)
+      (with-demoted-errors "%S"
+        (magit-commit-mark--commit-at-point-manipulate-with-sha1
+         repo-dir
+         sha1
+         'set
+         magit-commit-mark--bitflag-read)))
+     ;; Use timer for delay.
+     (t
+      (when magit-commit-mark--on-show-commit-global-timer
+        (cancel-timer magit-commit-mark--on-show-commit-global-timer))
+      (setq magit-commit-mark--on-show-commit-global-timer
+            (run-with-idle-timer
+             magit-commit-mark-on-show-commit-delay
+             nil
+             #'magit-commit-mark--show-commit-timer
+             (current-buffer)
+             (line-beginning-position)
+             repo-dir
+             sha1)))))
 
   ;; Regular function.
   (apply old-fn args))
@@ -624,10 +613,10 @@ ARG is the bit which is toggled, defaulting to 1 (read/unread)."
   :global nil
 
   (cond
-    (magit-commit-mark-mode
-      (magit-commit-mark--enable))
-    (t
-      (magit-commit-mark--disable))))
+   (magit-commit-mark-mode
+    (magit-commit-mark--enable))
+   (t
+    (magit-commit-mark--disable))))
 
 (provide 'magit-commit-mark)
 
