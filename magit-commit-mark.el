@@ -162,7 +162,7 @@ This must not be longer than the value used when displaying the log."
 
     ;; Set beginning.
     (goto-char point-beg)
-    (goto-char (line-beginning-position))
+    (beginning-of-line)
 
     (while (and (< (point) point-end) (not (eq (point) point-prev)))
       (let ((point-sha1-beg (point))
