@@ -152,13 +152,12 @@ This must not be longer than the value used when displaying the log."
            nil
            (mapcar (lambda (ov) (and (overlay-buffer ov) ov)) magit-commit-mark--overlays))))
 
-  (let
-      ( ;; Constants.
-       (flag-read (ash 1 magit-commit-mark--bitflag-read))
-       (flag-star (ash 1 magit-commit-mark--bitflag-star))
-       (flag-urgent (ash 1 magit-commit-mark--bitflag-urgent))
+  (let ((point-prev nil)
 
-       (point-prev nil))
+        ;; Constants.
+        (flag-read (ash 1 magit-commit-mark--bitflag-read))
+        (flag-star (ash 1 magit-commit-mark--bitflag-star))
+        (flag-urgent (ash 1 magit-commit-mark--bitflag-urgent)))
 
     ;; Set beginning.
     (goto-char point-beg)
@@ -461,15 +460,15 @@ REPO-DIR and SHA1 are forwarded to
   "Internal function use to advise using `magit-show-commit'.
 
 This calls OLD-FN with ARGS."
-  (let
-      ( ;; We only care about the SHA1, other values aren't important.
-       (sha1 (car args))
-       ;; Demote error so it's obvious marking failed and `old-fn' is never prevented from running.
-       ;; In practice this should never happen, it's mainly to prevent this package
-       ;; from breaking `magit' even in the chance of extremely unlikely situations.
-       (repo-dir
-        (with-demoted-errors "%S"
-          (magit-commit-mark--get-repo-dir-or-error))))
+  ;; We only care about the SHA1, other values aren't important.
+  (let ((sha1 (car args))
+        ;; Demote error so it's obvious marking failed and
+        ;; `old-fn' is never prevented from running.
+        ;; In practice this should never happen, it's mainly to prevent this package
+        ;; from breaking `magit' even in the chance of extremely unlikely situations.
+        (repo-dir
+         (with-demoted-errors "%S"
+           (magit-commit-mark--get-repo-dir-or-error))))
     (cond
      ;; The error will have been demoted to a message, do nothing.
      ((null repo-dir)
