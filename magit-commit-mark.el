@@ -618,5 +618,8 @@ ARG is the bit which is toggled, defaulting to 1 (read/unread)."
     (magit-commit-mark--disable))))
 
 (provide 'magit-commit-mark)
-
+;; Local Variables:
+;; fill-column: 99
+;; indent-tabs-mode: nil
+;; End:
 ;;; magit-commit-mark.el ends here
