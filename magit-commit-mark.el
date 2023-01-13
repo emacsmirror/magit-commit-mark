@@ -169,7 +169,7 @@ This must not be longer than the value used when displaying the log."
             (point-star-beg nil)
             (point-star-end nil)
             (point-subject-beg nil)
-            (point-subject-end (line-end-position)))
+            (point-subject-end (pos-eol)))
 
         (unless (zerop (skip-chars-forward "^[:blank:]" point-subject-end))
           (setq point-sha1-end (point))
@@ -238,10 +238,10 @@ This must not be longer than the value used when displaying the log."
      repo-hash
      (save-excursion
        (goto-char (max (point-min) (window-start)))
-       (line-beginning-position))
+       (pos-bol))
      (save-excursion
        (goto-char (min (point-max) (window-end)))
-       (line-end-position)))))
+       (pos-eol)))))
 
 
 ;; ---------------------------------------------------------------------------
@@ -382,7 +382,7 @@ When NO-FILE-READ is non-nil, initialize with an empty hash."
   "Check the REPO-HASH at the current point has it's FLAG set to STATE.
 This is a strict version which requires the SHA1 to be at the line start,
 useful for merge commits that show branching lines."
-  (unless (eq ?\s (char-after (line-beginning-position)))
+  (unless (eq ?\s (char-after (pos-bol)))
     (magit-commit-mark--step-to-bit-test-at-point repo-hash state flag)))
 
 (defun magit-commit-mark--step-to-bit (dir state bit)
@@ -449,7 +449,7 @@ REPO-DIR and SHA1 are forwarded to
   ;; Buffer has not been killed.
   (when (buffer-live-p buf)
     (with-current-buffer buf
-      (when (eq point-beg (line-beginning-position))
+      (when (eq point-beg (pos-bol))
         (magit-commit-mark--commit-at-point-manipulate-with-sha1
          repo-dir
          sha1
@@ -491,7 +491,7 @@ This calls OLD-FN with ARGS."
              nil
              #'magit-commit-mark--show-commit-timer
              (current-buffer)
-             (line-beginning-position)
+             (pos-bol)
              repo-dir
              sha1)))))
 
