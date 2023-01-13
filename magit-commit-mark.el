@@ -161,7 +161,7 @@ This must not be longer than the value used when displaying the log."
 
     ;; Set beginning.
     (goto-char point-beg)
-    (beginning-of-line)
+    (goto-char (pos-bol))
 
     (while (and (< (point) point-end) (not (eq (point) point-prev)))
       (let ((point-sha1-beg (point))
@@ -435,7 +435,7 @@ useful for merge commits that show branching lines."
 (defun magit-commit-mark--commit-at-point-action-on-bit-bol (action bit)
   "Perform ACTION on flag BIT (at line start)."
   (save-excursion
-    (beginning-of-line)
+    (goto-char (pos-bol))
     (magit-commit-mark--commit-at-point-action-on-bit action bit)))
 
 ;; ---------------------------------------------------------------------------
