@@ -168,8 +168,7 @@ This must not be longer than the value used when displaying the log."
     ;; Remove all overlays from this list which don't have an associated buffer.
     (setq magit-commit-mark--overlays
           (delq
-           nil
-           (mapcar (lambda (ov) (and (overlay-buffer ov) ov)) magit-commit-mark--overlays))))
+           nil (mapcar (lambda (ov) (and (overlay-buffer ov) ov)) magit-commit-mark--overlays))))
 
   (let ((point-prev nil)
 
@@ -421,9 +420,7 @@ useful for merge commits that show branching lines."
                   (not
                    (setq found
                          (magit-commit-mark--step-to-bit-test-at-point-strict
-                          repo-hash
-                          state
-                          flag))))
+                          repo-hash state flag))))
         (setq point-prev (point))
         (forward-line dir))
 
@@ -470,10 +467,7 @@ REPO-DIR and SHA1 are forwarded to
     (with-current-buffer buf
       (when (eq point-beg (pos-bol))
         (magit-commit-mark--commit-at-point-manipulate-with-sha1
-         repo-dir
-         sha1
-         'set
-         magit-commit-mark--bitflag-read)))))
+         repo-dir sha1 'set magit-commit-mark--bitflag-read)))))
 
 (defun magit-commit-mark--show-commit-advice (old-fn &rest args)
   "Internal function use to advise using `magit-show-commit'.
@@ -496,23 +490,15 @@ This calls OLD-FN with ARGS."
      ((zerop magit-commit-mark-on-show-commit-delay)
       (with-demoted-errors "%S"
         (magit-commit-mark--commit-at-point-manipulate-with-sha1
-         repo-dir
-         sha1
-         'set
-         magit-commit-mark--bitflag-read)))
+         repo-dir sha1 'set magit-commit-mark--bitflag-read)))
      ;; Use timer for delay.
      (t
       (when magit-commit-mark--on-show-commit-global-timer
         (cancel-timer magit-commit-mark--on-show-commit-global-timer))
       (setq magit-commit-mark--on-show-commit-global-timer
             (run-with-idle-timer
-             magit-commit-mark-on-show-commit-delay
-             nil
-             #'magit-commit-mark--show-commit-timer
-             (current-buffer)
-             (pos-bol)
-             repo-dir
-             sha1)))))
+             magit-commit-mark-on-show-commit-delay nil #'magit-commit-mark--show-commit-timer
+             (current-buffer) (pos-bol) repo-dir sha1)))))
 
   ;; Regular function.
   (apply old-fn args))
