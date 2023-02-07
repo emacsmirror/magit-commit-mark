@@ -5,6 +5,11 @@ Change Log
 
 - In development.
 
+  - 2023/02/07:
+
+    Report when ``magit-commit-mark-next-unread`` and ``magit-commit-mark-prev-unread``
+    do not find a message. Making it clear there was nothing to do and that the operation is not taking a long time.
+
   - 2022/08/09:
 
     Add ``magit-commit-mark-on-skip-to-unread`` as a convenient way to immediately mark commits as unread.

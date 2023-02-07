@@ -596,20 +596,28 @@ ARG is the bit which is toggled, defaulting to 1 (read/unread)."
   "Jump to the next unread message."
   (interactive)
   (let ((bit magit-commit-mark--bitflag-read))
-    (when (magit-commit-mark--step-to-bit 1 nil bit)
+    (cond
+     ((magit-commit-mark--step-to-bit 1 nil bit)
       (when magit-commit-mark-on-skip-to-unread
         (magit-commit-mark--commit-at-point-action-on-bit-bol 'set bit))
-      t)))
+      t)
+     (t
+      (message "No unread commits in view (next)")
+      nil))))
 
 ;;;###autoload
 (defun magit-commit-mark-prev-unread ()
   "Jump to the previous unread message."
   (interactive)
   (let ((bit magit-commit-mark--bitflag-read))
-    (when (magit-commit-mark--step-to-bit -1 nil bit)
+    (cond
+     ((magit-commit-mark--step-to-bit -1 nil bit)
       (when magit-commit-mark-on-skip-to-unread
         (magit-commit-mark--commit-at-point-action-on-bit-bol 'set bit))
-      t)))
+      t)
+     (t
+      (message "No unread commits in view (previous)")
+      nil))))
 
 ;;;###autoload
 (define-minor-mode magit-commit-mark-mode
