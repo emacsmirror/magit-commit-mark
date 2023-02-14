@@ -132,9 +132,9 @@ This must not be longer than the value used when displaying the log."
 (defun magit-commit-mark--get-sha1-at-point-or-nil ()
   "Return the SHA1 at point or nil."
   (let ((sha1
-         (or (magit-section-value-if 'module-commit)
-             (thing-at-point 'git-revision t)
-             (magit-branch-or-commit-at-point))))
+         (or (magit-commit-at-point)
+             (magit-section-value-if 'module-commit)
+             (thing-at-point 'git-revision t))))
     (when sha1
       (substring sha1 0 magit-commit-mark-sha1-length))))
 
