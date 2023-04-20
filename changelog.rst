@@ -5,6 +5,10 @@ Change Log
 
 - In development.
 
+  - 2023/04/20:
+
+    Ding when next/prev unread fail.
+
   - 2023/02/07:
 
     Report when ``magit-commit-mark-next-unread`` and ``magit-commit-mark-prev-unread``

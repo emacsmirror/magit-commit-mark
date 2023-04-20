@@ -603,6 +603,7 @@ ARG is the bit which is toggled, defaulting to 1 (read/unread)."
       t)
      (t
       (message "No unread commits in view (next)")
+      (ding t)
       nil))))
 
 ;;;###autoload
@@ -617,6 +618,7 @@ ARG is the bit which is toggled, defaulting to 1 (read/unread)."
       t)
      (t
       (message "No unread commits in view (previous)")
+      (ding t)
       nil))))
 
 ;;;###autoload
