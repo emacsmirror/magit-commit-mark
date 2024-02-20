@@ -22,6 +22,8 @@
 
 ;;; Code:
 (require 'magit-diff)
+;; For `magit-log-maybe-update-revision-buffer'.
+(require 'magit-log)
 
 ;; ---------------------------------------------------------------------------
 ;; Compatibility
