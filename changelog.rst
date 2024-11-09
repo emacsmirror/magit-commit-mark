@@ -5,6 +5,10 @@ Change Log
 
 - In development.
 
+  - 2024/11/09:
+
+    Fix accumulating the the ``--abbrev`` command when refreshing (in some cases).
+
   - 2023/04/20:
 
     Ding when next/prev unread fail.

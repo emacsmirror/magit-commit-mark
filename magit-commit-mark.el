@@ -519,7 +519,11 @@ This calls OLD-FN with ARGS."
 Needed so we can be sure to view the required number of SHA1 chars."
   (declare (important-return-value t))
   (pcase-let ((`(,args ,files) (funcall fn-orig mode)))
-    (list (append args (list (format "--abbrev=%d" magit-commit-mark-sha1-length))) files)))
+    (let ((arg (format "--abbrev=%d" magit-commit-mark-sha1-length)))
+      ;; When called multiple times, the argument may already be in the list.
+      (unless (member arg args)
+        (setq args (append args (list arg))))
+      (list args files))))
 
 
 ;; ---------------------------------------------------------------------------
