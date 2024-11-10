@@ -45,6 +45,14 @@ Functions
    Jump to the next unread commit.
 ``magit-commit-mark-prev-unread``
    Jump to the previous unread commit.
+``magit-commit-mark-report-urgent``
+   Report all urgent commits displayed to the message buffer
+   (limiting to the selection when present).
+``magit-commit-mark-report-star``
+   Report all starred commits displayed to the message buffer
+   (limiting to the selection when present).
+
+   Reporting can be useful when collecting commits to back-port for example.
 
 
 Customization

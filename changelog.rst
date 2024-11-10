@@ -5,6 +5,11 @@ Change Log
 
 - In development.
 
+  - 2024/11/10:
+
+    Add ``magit-commit-mark-report-urgent`` & ``magit-commit-mark-report-star``
+    to report urgent/starred SHA1's to the message buffer.
+
   - 2024/11/09:
 
     Fix accumulating the the ``--abbrev`` command when refreshing (in some cases).

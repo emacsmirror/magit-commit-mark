@@ -145,6 +145,22 @@ This must not be longer than the value used when displaying the log."
       (cons repo-dir sha1))))
 
 
+(defun magit-commit-mark--region-range-or-all ()
+  "Return the region range or buffer range (expanded to line bounds)."
+  (declare (important-return-value t))
+  (cond
+   ((region-active-p)
+    (save-excursion
+      (cons
+       (progn
+         (goto-char (region-beginning))
+         (pos-bol))
+       (progn
+         (goto-char (region-end))
+         (pos-eol)))))
+   (t
+    (list (point-min) (point-max)))))
+
 ;; ---------------------------------------------------------------------------
 ;; Overlay Management
 
@@ -283,6 +299,16 @@ When NO-FILE-READ is non-nil, initialize with an empty hash."
      ;; Initialize from file.
      (t
       (magit-commit-mark--hashfile-read-with-dir repo-dir)))))
+
+(defun magit-commit-mark--hash-ensure-or-error (repo-dir &optional no-file-read)
+  "A wrapper for `magit-commit-mark--hash-ensure' that raises an error on failure.
+
+See docs for REPO-DIR & NO-FILE-READ arguments."
+  (declare (important-return-value t))
+  (let ((repo-hash (magit-commit-mark--hash-ensure repo-dir no-file-read)))
+    (unless repo-hash
+      (error "No internal hash in %S" repo-dir))
+    repo-hash))
 
 (defun magit-commit-mark--hash-set (repo-dir repo-hash)
   "Set REPO-DIR REPO-HASH in `magit-commit-mark--repo-hashes'."
@@ -462,6 +488,31 @@ useful for merge commits that show branching lines."
   (save-excursion
     (goto-char (pos-bol))
     (magit-commit-mark--commit-at-point-action-on-bit action bit)))
+
+
+;; ---------------------------------------------------------------------------
+;; Report Marked Commits
+
+(defun magit-commit-mark--report-commits-by-bit (repo-hash bit)
+  "Report all commits in region using BIT."
+  ;; Use a region if it exists.
+  (save-excursion
+    (save-restriction
+      (apply #'narrow-to-region (magit-commit-mark--region-range-or-all))
+      (goto-char (point-min))
+      (let ((search t)
+            (flag (ash 1 bit)))
+        (while search
+          (let ((sha1 (magit-commit-mark--get-sha1-at-point-or-nil)))
+            (when sha1
+              (let ((value (gethash sha1 repo-hash)))
+                (when value
+                  (unless (zerop (logand value flag))
+                    ;; NOTE: we could optionally log to a buffer.
+                    (message "%s" sha1))))))
+          (unless (zerop (forward-line 1))
+            (setq search nil)))))))
+
 
 ;; ---------------------------------------------------------------------------
 ;; Internal Integration Functions
@@ -646,6 +697,24 @@ ARG is the bit which is toggled, defaulting to 1 (read/unread)."
       (message "No unread commits in view (previous)")
       (ding t)
       nil))))
+
+;;;###autoload
+(defun magit-commit-mark-report-urgent ()
+  "Report all urgent commits (within the region when present)."
+  (declare (important-return-value nil))
+  (interactive)
+  (let* ((repo-dir (magit-commit-mark--get-repo-dir-or-error))
+         (repo-hash (magit-commit-mark--hash-ensure-or-error repo-dir)))
+    (magit-commit-mark--report-commits-by-bit repo-hash magit-commit-mark--bitflag-urgent)))
+
+;;;###autoload
+(defun magit-commit-mark-report-star ()
+  "Report all starred commits (within the region when present)."
+  (declare (important-return-value nil))
+  (interactive)
+  (let* ((repo-dir (magit-commit-mark--get-repo-dir-or-error))
+         (repo-hash (magit-commit-mark--hash-ensure-or-error repo-dir)))
+    (magit-commit-mark--report-commits-by-bit repo-hash magit-commit-mark--bitflag-star)))
 
 ;;;###autoload
 (define-minor-mode magit-commit-mark-mode
