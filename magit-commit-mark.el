@@ -262,7 +262,7 @@ This must not be longer than the value used when displaying the log."
 
 (defun magit-commit-mark--overlay-refresh (repo-hash)
   "Refresh all SHA1 overlays using REPO-HASH."
-  (declare (important-return-value t))
+  (declare (important-return-value nil))
   (save-excursion
     (magit-commit-mark--overlay-refresh-range
      repo-hash
@@ -494,7 +494,7 @@ useful for merge commits that show branching lines."
 ;; Report Marked Commits
 
 (defun magit-commit-mark--report-commits-by-bit (repo-hash bit)
-  "Report all commits in region using BIT."
+  "Report all commits in region using BIT and REPO-HASH."
   ;; Use a region if it exists.
   (save-excursion
     (save-restriction
@@ -616,7 +616,7 @@ Needed so we can be sure to view the required number of SHA1 chars."
   (when magit-commit-mark-on-show-commit
     (advice-add 'magit-show-commit :around #'magit-commit-mark--show-commit-advice))
 
-  (when (eq major-mode 'magit-log-mode)
+  (when (derived-mode-p 'magit-log-mode)
     (magit-commit-mark--immediate-enable)))
 
 (defun magit-commit-mark--disable ()
@@ -631,7 +631,7 @@ Needed so we can be sure to view the required number of SHA1 chars."
   (when magit-commit-mark--on-show-commit-global-timer
     (cancel-timer magit-commit-mark--on-show-commit-global-timer))
 
-  (when (eq major-mode 'magit-log-mode)
+  (when (derived-mode-p 'magit-log-mode)
     (magit-commit-mark--immediate-disable)
     (kill-local-variable 'magit-commit-mark--overlays)))
 
