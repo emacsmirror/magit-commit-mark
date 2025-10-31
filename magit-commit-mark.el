@@ -59,16 +59,20 @@ This must not be longer than the value used when displaying the log."
 ;; Faces.
 
 (defface magit-commit-mark-read-face (list (list t (list :inherit 'font-lock-comment-face)))
-  "Face used to highlight the commit as read.")
+  "Face used to highlight the commit as read."
+  :group 'magit-commit-mark)
 
 (defface magit-commit-mark-unread-face (list (list t (list :inherit 'success)))
-  "Face used to highlight the commit as unread.")
+  "Face used to highlight the commit as unread."
+  :group 'magit-commit-mark)
 
 (defface magit-commit-mark-star-face (list (list t (list :inherit 'warning)))
-  "Face used to highlight the commit as starred.")
+  "Face used to highlight the commit as starred."
+  :group 'magit-commit-mark)
 
 (defface magit-commit-mark-urgent-face (list (list t (list :inherit 'error :extend t)))
-  "Face used to highlight the commit as urgent.")
+  "Face used to highlight the commit as urgent."
+  :group 'magit-commit-mark)
 
 
 ;; ---------------------------------------------------------------------------
