@@ -196,7 +196,7 @@ This must not be longer than the value used when displaying the log."
     (goto-char point-beg)
     (goto-char (pos-bol))
 
-    (while (and (< (point) point-end) (not (eq (point) point-prev)))
+    (while (and (< (point) point-end) (null (eq (point) point-prev)))
       (let ((point-sha1-beg (point))
             (point-sha1-end nil)
             (point-star-beg nil)
@@ -212,9 +212,9 @@ This must not be longer than the value used when displaying the log."
             (when (string-match-p "\\`[[:xdigit:]]+\\'" sha1)
               (setq sha1 (substring sha1 0 magit-commit-mark-sha1-length))
               (let* ((value (or (gethash sha1 repo-hash) 0))
-                     (is-read (not (zerop (logand value flag-read))))
-                     (is-star (not (zerop (logand value flag-star))))
-                     (is-urgent (not (zerop (logand value flag-urgent)))))
+                     (is-read (null (zerop (logand value flag-read))))
+                     (is-star (null (zerop (logand value flag-star))))
+                     (is-urgent (null (zerop (logand value flag-urgent)))))
 
                 (when (or is-urgent is-star)
                   (goto-char point-sha1-end)
@@ -429,7 +429,7 @@ See docs for REPO-DIR & NO-FILE-READ arguments."
   (let ((sha1 (magit-commit-mark--get-sha1-at-point-or-nil)))
     (when sha1
       (let ((value (or (gethash sha1 repo-hash) 0)))
-        (eq state (not (zerop (logand value flag))))))))
+        (eq state (null (zerop (logand value flag))))))))
 
 (defun magit-commit-mark--step-to-bit-test-at-point-strict (repo-hash state flag)
   "Check the REPO-HASH at the current point has it's FLAG set to STATE.
@@ -453,8 +453,8 @@ useful for merge commits that show branching lines."
     (save-excursion
       (forward-line dir)
 
-      (while (and (not (eq point-prev (point)))
-                  (not
+      (while (and (null (eq point-prev (point)))
+                  (null
                    (setq found
                          (magit-commit-mark--step-to-bit-test-at-point-strict
                           repo-hash state flag))))
