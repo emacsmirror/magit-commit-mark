@@ -397,10 +397,13 @@ See docs for REPO-DIR & NO-FILE-READ arguments."
             ('set (logior value flag))
             ('clear (logand value (lognot flag)))
             ('toggle (logxor value flag))
-            (code (message "Unknown value %S" code)))))
+            (_ (message "Unknown action %S" action)))))
 
     ;; When the result is true, the value change, update the file.
     (when (cond
+           ;; Do nothing, unknown action.
+           ((null value-next)
+            nil)
            ;; Do nothing, no value exist and it remains zero.
            ((and (null value-real) (zerop value-next))
             nil)
