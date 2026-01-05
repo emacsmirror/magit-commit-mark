@@ -50,7 +50,7 @@
   "The number of SHA1 characters to store and use to identify commits.
 
 This must not be longer than the value used when displaying the log."
-  :type 'integer)
+  :type 'natnum)
 
 (defcustom magit-commit-mark-directory
   (locate-user-emacs-file "magit-commit-mark" ".emacs-magit-commit-mark")
