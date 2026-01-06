@@ -3,7 +3,7 @@
 Emacs Magit Commit Mark
 #######################
 
-Support for persistent marking git-commits (similar to email).
+Support for persistently marking git-commits (similar to email).
 
 For Git users who read commits for the repositories they work on.
 
@@ -64,9 +64,6 @@ Customization
 ``magit-commit-mark-on-show-commit-delay`` (``2.0``)
    Delay (in seconds) before marking the commit as read (zero for instantly setting as read).
 
-``magit-commit-mark-on-show-commit`` (``t``)
-   Showing a commit marks it as read.
-
 ``magit-commit-mark-on-skip-to-unread`` (``nil``)
    Immediately mark the commit as read when navigating using
    ``magit-commit-mark-next-unread`` & ``magit-commit-mark-prev-unread``.
@@ -81,18 +78,18 @@ Customization
    The directory where the commit state for each repository is stored.
 
    When left unset ``(locate-user-emacs-file "magit-commit-mark" ".emacs-magit-commit-mark")`` is used
-   to calculate the location of this file.
+   to calculate the location of this directory.
 
 Faces:
 
 ``magit-commit-mark-read-face``
    The face used for read commits.
 ``magit-commit-mark-unread-face``
-   The face used for read commits.
+   The face used for unread commits.
 ``magit-commit-mark-star-face``
    The face used for starred commits.
 ``magit-commit-mark-urgent-face``
-   The face used for starred commits.
+   The face used for urgent commits.
 
 Key Bindings
 ------------
@@ -104,7 +101,7 @@ Key bindings will need to be set by the user, this example uses the ``;`` which 
    (with-eval-after-load 'magit-log
      (define-key magit-log-mode-map (kbd ";") 'magit-commit-mark-toggle-read)
      (define-key magit-log-mode-map (kbd "M-;") 'magit-commit-mark-toggle-star)
-     (define-key magit-log-mode-map (kbd "C-;") 'magit-commit-mark-toggle-urgent)
+     (define-key magit-log-mode-map (kbd "C-;") 'magit-commit-mark-toggle-urgent))
 
 
 Details
@@ -123,5 +120,5 @@ Installation
    (use-package magit-commit-mark
      :commands (magit-commit-mark-mode))
 
-   (eval-after-load 'magit
+   (with-eval-after-load 'magit
      (add-hook 'magit-mode-hook 'magit-commit-mark-mode))

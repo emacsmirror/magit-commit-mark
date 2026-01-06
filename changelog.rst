@@ -12,7 +12,7 @@ Change Log
 
   - 2024/11/09:
 
-    Fix accumulating the the ``--abbrev`` command when refreshing (in some cases).
+    Fix accumulating the ``--abbrev`` command when refreshing (in some cases).
 
   - 2023/04/20:
 
