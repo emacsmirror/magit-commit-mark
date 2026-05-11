@@ -193,7 +193,8 @@ This must not be longer than the value used when displaying the log."
         (flag-urgent (ash 1 magit-commit-mark--bitflag-urgent)))
 
     ;; Move to line start.
-    (goto-char (pos-bol point-beg))
+    (goto-char point-beg)
+    (goto-char (pos-bol))
 
     (while (and (< (point) point-end) (null (eq (point) point-prev)))
       (let ((point-sha1-beg (point))
