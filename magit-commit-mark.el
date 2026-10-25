@@ -546,9 +546,13 @@ This calls OLD-FN with ARGS."
         ;; In practice this should never happen, it's mainly to prevent this package
         ;; from breaking `magit' even in the chance of extremely unlikely situations.
         (repo-dir
-         (with-demoted-errors "%S"
-           (magit-commit-mark--get-repo-dir-or-error))))
+         (when magit-commit-mark-on-show-commit
+           (with-demoted-errors "%S"
+             (magit-commit-mark--get-repo-dir-or-error)))))
     (cond
+     ;; Disabled at run-time (see `magit-commit-mark-toggle-read-on-show').
+     ((null magit-commit-mark-on-show-commit)
+      nil)
      ;; The error will have been demoted to a message, do nothing.
      ((null repo-dir)
       nil)
@@ -612,8 +616,9 @@ Needed so we can be sure to view the required number of SHA1 chars."
 
   (advice-add 'magit-log-arguments :around #'magit-commit-mark--magit-log-arguments-extra)
 
-  (when magit-commit-mark-on-show-commit
-    (advice-add 'magit-show-commit :around #'magit-commit-mark--show-commit-advice))
+  ;; NOTE: always add the advice so `magit-commit-mark-on-show-commit'
+  ;; can be toggled while the mode is enabled.
+  (advice-add 'magit-show-commit :around #'magit-commit-mark--show-commit-advice)
 
   (when (derived-mode-p 'magit-log-mode)
     (magit-commit-mark--immediate-enable)))
@@ -624,8 +629,7 @@ Needed so we can be sure to view the required number of SHA1 chars."
 
   (advice-remove 'magit-log-arguments #'magit-commit-mark--magit-log-arguments-extra)
 
-  (when magit-commit-mark-on-show-commit
-    (advice-remove 'magit-show-commit #'magit-commit-mark--show-commit-advice))
+  (advice-remove 'magit-show-commit #'magit-commit-mark--show-commit-advice)
 
   (when magit-commit-mark--on-show-commit-global-timer
     (cancel-timer magit-commit-mark--on-show-commit-global-timer))
@@ -658,6 +662,27 @@ Needed so we can be sure to view the required number of SHA1 chars."
   (declare (important-return-value nil))
   (interactive)
   (magit-commit-mark--commit-at-point-action-on-bit-bol 'toggle magit-commit-mark--bitflag-urgent))
+
+;;;###autoload
+(defun magit-commit-mark-toggle-read-on-show ()
+  "Toggle marking commits as read when displayed.
+This toggles `magit-commit-mark-on-show-commit'."
+  (declare (important-return-value nil))
+  (interactive)
+  (setq magit-commit-mark-on-show-commit (not magit-commit-mark-on-show-commit))
+  ;; Don't mark a commit that is pending from before the toggle.
+  ;;
+  ;; NOTE: when enabling, there is no need to start the timer,
+  ;; showing a commit starts it.
+  (when magit-commit-mark--on-show-commit-global-timer
+    (cancel-timer magit-commit-mark--on-show-commit-global-timer)
+    (setq magit-commit-mark--on-show-commit-global-timer nil))
+  (message "Mark as read on show commit: %s"
+           (cond
+            (magit-commit-mark-on-show-commit
+             "enabled")
+            (t
+             "disabled"))))
 
 ;; NOTE: other stepping functions could be added,
 ;; for now stepping by unread seems the most useful.
