@@ -500,7 +500,8 @@ useful for merge commits that show branching lines."
   (declare (important-return-value nil))
   (save-excursion
     (save-restriction
-      (apply #'narrow-to-region (magit-commit-mark--region-range-or-all))
+      (let ((range (magit-commit-mark--region-range-or-all)))
+        (narrow-to-region (car range) (cdr range)))
       (goto-char (point-min))
       (let ((search t)
             (flag (ash 1 bit)))
